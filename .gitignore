@@ -1,4 +1,4 @@
 .idea
 *.pyc
 .ipynb_checkpoints
-training_checkpoints
+checkpoints

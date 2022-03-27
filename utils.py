@@ -1,6 +1,6 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import os
+import numpy as np
 import time
 import json
 import imageio
@@ -12,6 +12,7 @@ with open('config.json', 'r') as f:
 BATCH_SIZE = config['batch_size']
 noise_dim = config['noise_dim']
 EPOCHS = config['epochs']
+DATANAME = config['dataname']
 
 
 # Notice the use of `tf.function`
@@ -73,36 +74,61 @@ def summmariseBatchPerformance(gen_acc, disc_acc, gen_loss, disc_loss):
     decimal_disc_acc = extractFloatFromEagerTensor(disc_acc, 2)
     decimal_gen_loss = extractFloatFromEagerTensor(gen_loss, 4)
     decimal_disc_loss = extractFloatFromEagerTensor(disc_loss, 4)
-    print(f'Loss | Gen: {decimal_gen_loss}, Disc: {decimal_disc_loss}')
-    print(f'Acc | Gen: {decimal_gen_acc}, Disc: {decimal_disc_acc}')
+    # print(f'Loss | Gen: {decimal_gen_loss}, Disc: {decimal_disc_loss}')
+    # print(f'Acc | Gen: {decimal_gen_acc}, Disc: {decimal_disc_acc}')
+    return (decimal_gen_acc, decimal_disc_acc), (decimal_gen_loss, decimal_disc_loss)
 
 
 def train(dataset, test_input, generator, discriminator):
-    checkpoint_dir = './training_checkpoints'
-    checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
-    checkpoint = createModelCheckpoint(generator, discriminator)
+    history = {'Gen Acc': [], 'Disc Acc': [], 'Gen Loss': [], 'Disc Loss': []}
 
     for epoch in range(EPOCHS):
         start = time.time()
 
         for image_batch in dataset:
             gen_acc, disc_acc, gen_loss, disc_loss = train_step(image_batch, generator, discriminator)
-            summmariseBatchPerformance(gen_acc, disc_acc, gen_loss, disc_loss)
+            batch_acc, batch_loss = summmariseBatchPerformance(gen_acc, disc_acc, gen_loss, disc_loss)
+            history = updatePerformanceStats(batch_acc, batch_loss, history)
 
             # Save the model every 15 epochs
-            if (epoch + 1) % 4 == 0:
-                checkpoint.save(file_prefix=checkpoint_prefix)
-                filename = f'images_epoch{epoch + 1:04d}.png'
-                generate_and_save_images(generator.model, test_input, filename)
+            if (epoch + 1) % 1 == 0:
+                generator.model.save_weights(f'./checkpoints/generator_{DATANAME}.h5', save_format="h5")
+                discriminator.model.save_weights(f'./checkpoints/discriminator_{DATANAME}.h5', save_format="h5")
+        filename = f'{DATANAME}_epoch_{epoch + 1:04d}.png'
+        generate_and_save_images(generator.model, test_input, filename)
         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+        print(f"Loss | Gen: {np.mean(history['Gen Loss'])}, Disc: {np.mean(history['Disc Loss'])}")
+        print(f"Acc | Gen: {np.mean(history['Gen Acc'])}, Disc: {np.mean(history['Disc Acc'])}")
+    return history
 
 
 def saveImagesAsGIF(anim_file):
     with imageio.get_writer(anim_file, mode='I') as writer:
-        filenames = glob.glob('image*.png')
+        filenames = glob.glob(f'{DATANAME}*.png')
         filenames = sorted(filenames)
         for filename in filenames:
             image = imageio.imread(filename)
             writer.append_data(image)
-        image = imageio.imread(filename)
-        writer.append_data(image)
+
+
+def saveAndPlotModelPerformance(history, filename):
+    with open(f'{filename}.json', 'w') as f_:
+        json.dump(history, f_)
+    fig, (ax1, ax2) = plt.subplots(2, figsize=(10, 5), sharex=True)
+    fig.suptitle("Generator and Discriminator Loss During Training")
+    ax1.plot(history['Gen Loss'], label='G')
+    ax1.plot(history['Disc Loss'], label='D')
+    ax1.set_ylabel("Loss")
+    ax2.plot(history['Gen Acc'], label='G')
+    ax2.plot(history['Disc Acc'], label='D')
+    ax2.set_ylabel("Accuracy")
+    ax2.set_xlabel("Iterations")
+    fig.savefig(f'{filename}.png', dpi=fig.dpi)
+
+
+def updatePerformanceStats(batch_acc, batch_loss, history):
+    history['Gen Acc'].append(batch_acc[0])
+    history['Disc Acc'].append(batch_acc[1])
+    history['Gen Loss'].append(batch_loss[0])
+    history['Disc Loss'].append(batch_loss[1])
+    return history

@@ -1,8 +1,9 @@
 {
-  "epochs": 12,
+  "dataname": "minst",
+  "epochs": 30,
   "noise_dim": 100,
   "num_examples_to_generate": 16,
-  "batch_size": 2048,
+  "batch_size": 512,
   "buffer_size": 600000,
   "generator": {
     "input_size": 100,
@@ -14,7 +15,9 @@
     "filter_size": 3,
     "stride": 2,
     "image_len": 7,
-    "colour_channel": 1
+    "colour_channel": 1,
+    "initial_std": 0.02,
+    "initial_mean": 0.00
   },
   "discriminator": {
     "input_size": 100,
@@ -27,7 +30,9 @@
     "stride": 2,
     "dropout": 0.2,
     "image_len": 28,
-    "colour_channel": 1
+    "colour_channel": 1,
+    "initial_std": 0.02,
+    "initial_mean": 0.00
   }
 
 }

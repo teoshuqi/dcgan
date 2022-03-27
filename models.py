@@ -21,6 +21,9 @@ class Generator:
         self.stride = config['stride']
         self.image_len = config['image_len']
         self.colour_channel = config['colour_channel']
+        self.initial_std = config['initial_std']
+        self.initial_mean = config['initial_mean']
+        self.initializer = tf.keras.initializers.RandomNormal(mean=self.initial_mean, stddev=self.initial_std)
         self.optimizer = self.__optimizer()
 
         self.model = self.__builtModelLayers()
@@ -41,6 +44,7 @@ class Generator:
             model.add(layers.Conv2DTranspose(self.filter / (l + 1), (self.filter_size, self.filter_size),
                                              strides=(self.stride, self.stride),
                                              padding='same',
+                                             kernel_initializer=self.initializer,
                                              use_bias=False))
             self.image_len = self.stride * self.image_len
             assert model.output_shape == (None, self.image_len, self.image_len, self.filter / (l + 1))
@@ -50,6 +54,7 @@ class Generator:
         model.add(layers.Conv2DTranspose(self.colour_channel, (self.filter_size, self.filter_size),
                                          strides=(self.stride, self.stride),
                                          padding='same',
+                                         kernel_initializer=self.initializer,
                                          use_bias=False,
                                          activation='tanh'))
         self.image_len = self.stride * self.image_len
@@ -88,6 +93,9 @@ class Discriminator:
         self.dropout = config['dropout']
         self.image_len = config['image_len']
         self.colour_channel = config['colour_channel']
+        self.initial_std = config['initial_std']
+        self.initial_mean = config['initial_mean']
+        self.initializer = tf.keras.initializers.RandomNormal(mean=self.initial_mean, stddev=self.initial_std)
         self.optimizer = self.__optimizer()
 
         self.model = self.__buildModel()
@@ -100,6 +108,7 @@ class Discriminator:
                                     (self.filter_size, self.filter_size),
                                     strides=(self.stride, self.stride),
                                     padding='same',
+                                    kernel_initializer=self.initializer,
                                     input_shape=[self.image_len, self.image_len, self.colour_channel]))
             self.image_len = self.image_len / self.stride
             assert model.output_shape == (None, self.image_len, self.image_len, self.filter * l)
