@@ -1,0 +1,35 @@
+{
+  "epochs": 12,
+  "noise_dim": 100,
+  "num_examples_to_generate": 16,
+  "batch_size": 2048,
+  "buffer_size": 600000,
+  "generator": {
+    "input_size": 100,
+    "adam_lr": 2e-4,
+    "adam_beta1": 0.5,
+    "activation_alpha": 0.2,
+    "layers": 2,
+    "filters": 256,
+    "filter_size": 3,
+    "stride": 2,
+    "image_len": 7,
+    "colour_channel": 1
+  },
+  "discriminator": {
+    "input_size": 100,
+    "adam_lr": 2e-4,
+    "adam_beta1": 0.5,
+    "activation_alpha": 0.2,
+    "layers": 2,
+    "filters": 64,
+    "filter_size": 3,
+    "stride": 2,
+    "dropout": 0.2,
+    "image_len": 28,
+    "colour_channel": 1
+  }
+
+}
+
+
