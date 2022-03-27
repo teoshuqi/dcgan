@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import os
 import time
 import json
+import imageio
+import glob
 
 with open('config.json', 'r') as f:
     config = json.load(f)
@@ -45,7 +47,6 @@ def createModelCheckpoint(generator, discriminator):
     return checkpoint
 
 
-
 def generate_and_save_images(model, test_input, filename):
     # Notice `training` is set to False.
     # This is so all layers run in inference mode (batchnorm).
@@ -55,7 +56,7 @@ def generate_and_save_images(model, test_input, filename):
 
     for i in range(predictions.shape[0]):
         plt.subplot(4, 4, i + 1)
-        plt.imshow(predictions[i, :, :, 0]/255, cmap='gray')
+        plt.imshow(predictions[i, :, :, 0] / 255, cmap='gray')
         plt.axis('off')
 
     plt.savefig(f'./generated_images/{filename}')
@@ -94,3 +95,14 @@ def train(dataset, test_input, generator, discriminator):
                 filename = f'images_epoch{epoch + 1:04d}.png'
                 generate_and_save_images(generator.model, test_input, filename)
         print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+
+
+def saveImagesAsGIF(anim_file):
+    with imageio.get_writer(anim_file, mode='I') as writer:
+        filenames = glob.glob('image*.png')
+        filenames = sorted(filenames)
+        for filename in filenames:
+            image = imageio.imread(filename)
+            writer.append_data(image)
+        image = imageio.imread(filename)
+        writer.append_data(image)

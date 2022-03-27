@@ -28,3 +28,4 @@ print('Final')
 utils.generate_and_save_images(generator.model, test_input, 'image_final.png')
 
 
+utils.saveImagesAsGIF('dcgan_minst.gif')
