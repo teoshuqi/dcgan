@@ -13,7 +13,7 @@ BATCH_SIZE = config['batch_size']
 noise_dim = config['noise_dim']
 EPOCHS = config['epochs']
 DATANAME = config['dataname']
-
+stats_dir = config['stats_dir']
 
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
@@ -48,20 +48,6 @@ def createModelCheckpoint(generator, discriminator):
     return checkpoint
 
 
-def generate_and_save_images(model, test_input, filename):
-    # Notice `training` is set to False.
-    # This is so all layers run in inference mode (batchnorm).
-    predictions = model(test_input, training=False)
-
-    fig = plt.figure(figsize=(4, 4))
-
-    for i in range(predictions.shape[0]):
-        plt.subplot(4, 4, i + 1)
-        plt.imshow(predictions[i, :, :, 0] / 255, cmap='gray')
-        plt.axis('off')
-
-    plt.savefig(f'./generated_images/{filename}')
-
 
 def extractFloatFromEagerTensor(eagerTensor, dp):
     decimals = float(tf.cast(eagerTensor, tf.float32))
@@ -74,8 +60,6 @@ def summmariseBatchPerformance(gen_acc, disc_acc, gen_loss, disc_loss):
     decimal_disc_acc = extractFloatFromEagerTensor(disc_acc, 2)
     decimal_gen_loss = extractFloatFromEagerTensor(gen_loss, 4)
     decimal_disc_loss = extractFloatFromEagerTensor(disc_loss, 4)
-    # print(f'Loss | Gen: {decimal_gen_loss}, Disc: {decimal_disc_loss}')
-    # print(f'Acc | Gen: {decimal_gen_acc}, Disc: {decimal_disc_acc}')
     return (decimal_gen_acc, decimal_disc_acc), (decimal_gen_loss, decimal_disc_loss)
 
 
@@ -102,7 +86,7 @@ def train(dataset, test_input, generator, discriminator):
     return history
 
 
-def saveImagesAsGIF(anim_file):
+def saveImagesAsGIF(anim_file=f'./{stats_dir}/{DATANAME}/dcgan.gif'):
     with imageio.get_writer(anim_file, mode='I') as writer:
         filenames = glob.glob(f'{DATANAME}*.png')
         filenames = sorted(filenames)
@@ -110,25 +94,3 @@ def saveImagesAsGIF(anim_file):
             image = imageio.imread(filename)
             writer.append_data(image)
 
-
-def saveAndPlotModelPerformance(history, filename):
-    with open(f'{filename}.json', 'w') as f_:
-        json.dump(history, f_)
-    fig, (ax1, ax2) = plt.subplots(2, figsize=(10, 5), sharex=True)
-    fig.suptitle("Generator and Discriminator Loss During Training")
-    ax1.plot(history['Gen Loss'], label='G')
-    ax1.plot(history['Disc Loss'], label='D')
-    ax1.set_ylabel("Loss")
-    ax2.plot(history['Gen Acc'], label='G')
-    ax2.plot(history['Disc Acc'], label='D')
-    ax2.set_ylabel("Accuracy")
-    ax2.set_xlabel("Iterations")
-    fig.savefig(f'{filename}.png', dpi=fig.dpi)
-
-
-def updatePerformanceStats(batch_acc, batch_loss, history):
-    history['Gen Acc'].append(batch_acc[0])
-    history['Disc Acc'].append(batch_acc[1])
-    history['Gen Loss'].append(batch_loss[0])
-    history['Disc Loss'].append(batch_loss[1])
-    return history
