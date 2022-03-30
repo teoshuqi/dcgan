@@ -70,7 +70,6 @@ class DCGAN:
             self.predict(test_input, filename)
             self.__logEpochPerformance(epoch, start)
 
-        return history
 
     def predict(self, test_input, filename):
         # Notice `training` is set to False.

@@ -1,7 +1,7 @@
 {
   "cuda": -1,
   "dataname": "minst",
-  "epochs": 30,
+  "epochs": 50,
   "noise_dim": 100,
   "num_examples_to_generate": 16,
   "batch_size": 256,
