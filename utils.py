@@ -6,7 +6,7 @@ import json
 import imageio
 import glob
 
-with open('config.json', 'r') as f:
+with open('config_faces.json', 'r') as f:
     config = json.load(f)
 
 BATCH_SIZE = config['batch_size']

@@ -1,0 +1,44 @@
+{
+  "cuda": -1,
+  "dataname": "faces",
+  "epochs": 50,
+  "noise_dim": 100,
+  "num_examples_to_generate": 16,
+  "batch_size": 256,
+  "buffer_size": 250000,
+  "model_dir": "checkpoints",
+  "predict_dir": "generated_images",
+  "stats_dir": "stats",
+  "generator": {
+    "input_size": 100,
+    "adam_lr": 1e-4,
+    "adam_beta1": 0.8,
+    "activation_alpha": 0.2,
+    "layers": 4,
+    "filters": 256,
+    "filter_size": 5,
+    "stride": 2,
+    "image_len": 8,
+    "colour_channel": 3,
+    "initial_std": 0.02,
+    "initial_mean": 0.00
+  },
+  "discriminator": {
+    "input_size": 100,
+    "adam_lr": 1e-4,
+    "adam_beta1": 0.5,
+    "activation_alpha": 0.2,
+    "layers": 5,
+    "filters": 128,
+    "filter_size": 5,
+    "stride": 2,
+    "dropout": 0.3,
+    "image_len": 128,
+    "colour_channel": 3,
+    "initial_std": 0.02,
+    "initial_mean": 0.00
+  }
+
+}
+
+

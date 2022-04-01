@@ -5,9 +5,9 @@ import json
 import utils
 import glob
 from models import DCGAN
-from data import MINST
+from data import MINST, loadCustomDataset
 
-with open('config.json', 'r') as f_:
+with open('config_faces.json', 'r') as f_:
     config = json.load(f_)
 
 num_examples_to_generate = config['num_examples_to_generate']
@@ -19,13 +19,13 @@ stats_dir = config['stats_dir']
 
 if __name__ == "__main__":
     dcgan = DCGAN(config)
-    if len(glob.glob(f"{model_dir}\\{DATANAME}\\*_{DATANAME}.h5")) > 1:
-        dcgan.load_weights()
+    # if len(glob.glob(f"{model_dir}\\{DATANAME}\\*_{DATANAME}.h5")) > 1:
+    #     dcgan.load_weights()
 
     test = tf.random.normal([num_examples_to_generate, noise_dim])
-    train_dataset = MINST()
+    train_dataset = loadCustomDataset("C:/Users/Shu Qi/Desktop/PycharmProjects/subset_faces")
 
-    dcgan.predict(test, f'{DATANAME}_0000.png')
+    dcgan.predict(test, f'epoch_0000.png')
 
     print(f'Start training DCGAN for {DATANAME} dataset')
     history = dcgan.train(train_dataset, test)

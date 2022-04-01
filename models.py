@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import time
 import json
 
-with open('config.json', 'r') as f:
+with open('config_faces.json', 'r') as f:
     config = json.load(f)
 
 dataname = config['dataname']
 model_dir = config['model_dir']
 predict_dir = config['predict_dir']
 stats_dir = config['stats_dir']
+
 
 def meanBinaryAccuracy(y_true, y_pred_logits):
     y_pred_class = tf.math.round(y_pred_logits)
@@ -67,9 +68,10 @@ class DCGAN:
                     self.generator.save_weights()
                     self.discriminator.save_weights()
             filename = f'epoch_{epoch + 1:04d}.png'
+            print(filename)
             self.predict(test_input, filename)
             self.__logEpochPerformance(epoch, start)
-
+            plt.close('all')
 
     def predict(self, test_input, filename):
         # Notice `training` is set to False.
@@ -80,13 +82,15 @@ class DCGAN:
 
         for i in range(predictions.shape[0]):
             plt.subplot(4, 4, i + 1)
-            plt.imshow((predictions[i, :, :, 0] - 127.5) / 127.5, cmap='gray')
+            denormalize_predictions = np.array((predictions[i, :, :, :] + 1) /2)
+
+            plt.imshow(denormalize_predictions)
             plt.axis('off')
 
         plt.savefig(f'./{predict_dir}/{dataname}/{filename}')
         return fig
 
-    def saveModelPerformance(self, filename=f'./{stats_dir}/dcgan'):
+    def saveModelPerformance(self, filename=f'./{stats_dir}/{dataname}/dcgan'):
         with open(f'{filename}.json', 'w') as f_:
             json.dump(self.history, f_)
         fig, (ax1, ax2) = plt.subplots(2, figsize=(10, 5), sharex=True)
@@ -133,13 +137,14 @@ class Generator:
         assert model.output_shape == (None, self.image_len, self.image_len, self.filter)  # Note: None is the batch size
 
         for l in range(1, self.layers):
-            model.add(layers.Conv2DTranspose(self.filter / (l + 1), (self.filter_size, self.filter_size),
+            self.filter = self.filter / 2
+            model.add(layers.Conv2DTranspose(self.filter, (self.filter_size, self.filter_size),
                                              strides=(self.stride, self.stride),
                                              padding='same',
                                              kernel_initializer=self.initializer,
                                              use_bias=False))
             self.image_len = self.stride * self.image_len
-            assert model.output_shape == (None, self.image_len, self.image_len, self.filter / (l + 1))
+            assert model.output_shape == (None, self.image_len, self.image_len, self.filter)
             model.add(layers.BatchNormalization())
             model.add(layers.LeakyReLU(alpha=self.activation_alpha))
 
