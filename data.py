@@ -35,11 +35,11 @@ def load_custom_dataset(data_dir):
         data_dir,
         labels=None,
         seed=123,
-        image_size=(128, 128),
+        image_size=(64, 64),
         batch_size=BATCH_SIZE)
 
-    train_ds = train_ds.cache().shuffle(buffer_size=BUFFER_SIZE)
-    train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
+#    train_ds = train_ds.cache().shuffle(buffer_size=BUFFER_SIZE)
+    train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
     normalization_layer = layers.Rescaling(scale=1./127.5, offset=-1)
     train_ds = train_ds.map(lambda x: (normalization_layer(x)))
     return train_ds

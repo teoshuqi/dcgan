@@ -68,6 +68,7 @@ class DCGAN:
                     self.generator.save_weights()
                     self.discriminator.save_weights()
             filename = f'epoch_{epoch + 1:04d}.png'
+
             self.predict(test_input, filename)
             self.__logEpochPerformance(epoch, start)
             plt.close('all')
@@ -207,7 +208,7 @@ class Discriminator:
         model = tf.keras.Sequential()
 
         for l in range(1, self.layers):
-            self.filter *= 1
+            self.filter *= 2
             model.add(layers.Conv2D(self.filter,
                                     (self.filter_size, self.filter_size),
                                     strides=(self.stride, self.stride),
@@ -232,7 +233,7 @@ class Discriminator:
         :param fake_output: raw model output from discriminator using generated images
         :return: binary crossentropy
         """
-        cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True, label_smoothing=0.1)
+        cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True, label_smoothing=0.2)
         real_loss = cross_entropy(tf.ones_like(real_output), real_output)
         fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
         total_loss = real_loss + fake_loss
