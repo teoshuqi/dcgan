@@ -68,7 +68,6 @@ class DCGAN:
                     self.generator.save_weights()
                     self.discriminator.save_weights()
             filename = f'epoch_{epoch + 1:04d}.png'
-            print(filename)
             self.predict(test_input, filename)
             self.__logEpochPerformance(epoch, start)
             plt.close('all')
@@ -208,7 +207,7 @@ class Discriminator:
         model = tf.keras.Sequential()
 
         for l in range(1, self.layers):
-            self.filter *= 2
+            self.filter *= 1
             model.add(layers.Conv2D(self.filter,
                                     (self.filter_size, self.filter_size),
                                     strides=(self.stride, self.stride),

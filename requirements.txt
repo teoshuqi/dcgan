@@ -1,6 +1,6 @@
 h5py==3.6.0
 imageio==2.16.1
-jupyter-notebook
+jupyter notebook
 keras==2.8.0
 Keras-Preprocessing==1.1.2
 matplotlib==3.5.1
